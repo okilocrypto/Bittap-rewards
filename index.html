@@ -1,95 +1,88 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>獎勵試算表模擬</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>獎勵試算工具｜Kuma Trading</title>
   <style>
-    body { font-family: sans-serif; padding: 2rem; background: #f8f9fa; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    body { font-family: sans-serif; padding: 2rem; background: #f0f4f8; color: #333; }
+    h1 { text-align: center; margin-bottom: 2rem; color: #222; }
+    table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem; }
     th, td { border: 1px solid #ccc; padding: 0.75rem; text-align: center; }
-    th { background: #e9ecef; }
-    input[type="number"] { width: 100px; padding: 0.4rem; }
-    .result { font-weight: bold; background: #fff3cd; }
+    th { background: #007aff; color: white; }
+    input[type="number"] { width: 100px; padding: 0.4rem; border: 1px solid #ccc; border-radius: 4px; }
+    .result { font-weight: bold; background: #fff8e1; }
+    footer { text-align: center; margin-top: 2rem; font-size: 0.9rem; color: #777; }
   </style>
 </head>
 <body>
-  <h1>獎勵試算表模擬</h1>
+  <h1>💰 獎勵試算工具｜Kuma Trading</h1>
   <table>
     <thead>
       <tr>
-        <th>輸入：淨入金 (USDT)</th>
-        <th>輸入：累計交易量 (USDT)</th>
-        <th>🎁 任務體驗金（可疊加）</th>
-        <th>📦 合約體驗金（取最高）</th>
-        <th>說明</th>
+        <th>淨入金 (USDT)</th>
+        <th>累計交易量 (USDT)</th>
+        <th>任務體驗金</th>
+        <th>合約體驗金</th>
+        <th>轉盤體驗金</th>
+        <th>總獎勵</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td><input type="number" id="deposit" value="" /></td>
-        <td><input type="number" id="volume" value="" /></td>
+        <td><input type="number" id="deposit" /></td>
+        <td><input type="number" id="volume" /></td>
         <td class="result" id="mission"></td>
         <td class="result" id="contract"></td>
-        <td class="result" id="desc"></td>
+        <td class="result" id="wheel"></td>
+        <td class="result" id="total"></td>
       </tr>
     </tbody>
   </table>
 
   <script>
-    const missionRewards = [
-      { d: 50, v: 10000, r: 5 },
-      { d: 100, v: 50000, r: 10 },
-      { d: 200, v: 100000, r: 15 },
-      { d: 300, v: 300000, r: 20 },
-      { d: 500, v: 1000000, r: 50 },
-      { d: 1000, v: 2000000, r: 100 },
-      { d: 3000, v: 3000000, r: 300 },
-      { d: 5000, v: 5000000, r: 500 },
-      { d: 10000, v: 10000000, r: 1000 },
-      { d: 20000, v: 30000000, r: 2000 },
-      { d: 30000, v: 60000000, r: 3000 },
-      { d: 50000, v: 100000000, r: 5000 }
+    const mission = [
+      { d: 50, v: 10000, r: 5 }, { d: 100, v: 50000, r: 10 }, { d: 200, v: 100000, r: 15 },
+      { d: 300, v: 300000, r: 20 }, { d: 500, v: 1000000, r: 50 }, { d: 1000, v: 2000000, r: 100 },
+      { d: 3000, v: 3000000, r: 300 }, { d: 5000, v: 5000000, r: 500 }, { d: 10000, v: 10000000, r: 1000 },
+      { d: 20000, v: 30000000, r: 2000 }, { d: 30000, v: 60000000, r: 3000 }, { d: 50000, v: 100000000, r: 5000 }
     ];
 
-    const contractRewards = [
-      { d: 100, v: 100000, r: 20 },
-      { d: 200, v: 500000, r: 100 },
-      { d: 300, v: 1000000, r: 200 },
-      { d: 500, v: 3000000, r: 350 },
-      { d: 1000, v: 5000000, r: 700 },
-      { d: 2000, v: 10000000, r: 2000 }
+    const contract = [
+      { d: 100, v: 100000, r: 20 }, { d: 200, v: 500000, r: 100 }, { d: 300, v: 1000000, r: 200 },
+      { d: 500, v: 3000000, r: 350 }, { d: 1000, v: 5000000, r: 700 }, { d: 2000, v: 10000000, r: 2000 }
     ];
 
-    const depositInput = document.getElementById("deposit");
-    const volumeInput = document.getElementById("volume");
-    const missionCell = document.getElementById("mission");
-    const contractCell = document.getElementById("contract");
-    const descCell = document.getElementById("desc");
+    const wheel = [
+      { d: 300, v: 250000, r: 109 }, { d: 3000, v: 2000000, r: 809 }, { d: 5000, v: 5000000, r: 1009 }
+    ];
 
-    function calculate() {
-      const deposit = Number(depositInput.value);
-      const volume = Number(volumeInput.value);
-
-      let missionTotal = 0;
-      for (const rule of missionRewards) {
-        if (deposit >= rule.d && volume >= rule.v) missionTotal += rule.r;
+    const getSum = (rules, deposit, volume, type) => {
+      if (type === 'max') {
+        return rules.reduce((acc, r) =>
+          deposit >= r.d && volume >= r.v && r.r > acc ? r.r : acc, 0);
+      } else {
+        return rules.reduce((acc, r) =>
+          deposit >= r.d && volume >= r.v ? acc + r.r : acc, 0);
       }
+    };
 
-      let contractMax = 0;
-      for (const rule of contractRewards) {
-        if (deposit >= rule.d && volume >= rule.v && rule.r > contractMax) {
-          contractMax = rule.r;
-        }
-      }
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', () => {
+        const deposit = parseFloat(document.getElementById('deposit').value) || 0;
+        const volume = parseFloat(document.getElementById('volume').value) || 0;
 
-      missionCell.textContent = missionTotal;
-      contractCell.textContent = contractMax;
-      descCell.textContent = `任務 +${missionTotal}，合約 +${contractMax}，共 ${missionTotal + contractMax} USDT`;
-    }
+        const m = getSum(mission, deposit, volume, 'sum');
+        const c = getSum(contract, deposit, volume, 'max');
+        const w = getSum(wheel, deposit, volume, 'sum');
+        const t = m + c + w;
 
-    depositInput.addEventListener("input", calculate);
-    volumeInput.addEventListener("input", calculate);
+        document.getElementById('mission').textContent = m ? m + ' U' : '-';
+        document.getElementById('contract').textContent = c ? c + ' U' : '-';
+        document.getElementById('wheel').textContent = w ? w + ' U' : '-';
+        document.getElementById('total').textContent = t ? t + ' USDT' : '-';
+      });
+    });
   </script>
 </body>
 </html>
