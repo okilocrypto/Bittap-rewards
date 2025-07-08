@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bittap用戶回報表單</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-md p-6 bg-white shadow-md rounded-2xl border border-gray-200">
+    <h1 class="text-2xl font-semibold text-center text-gray-700">Bittap用戶回報表單</h1>
+    <p class="text-sm text-center text-gray-500 mb-6">by your BD-Kuma</p>
+
+    <form id="ticketForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-600 mb-1">UID</label>
+        <input type="text" name="uid" required
+               class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+        <input type="email" name="email" required
+               class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-600 mb-1">問題描述</label>
+        <textarea name="desc" rows="4" required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+      </div>
+      <div>
+        <button id="submitBtn" type="submit"
+                class="w-full bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition">
+          送出回報
+        </button>
+      </div>
+      <div id="formMsg" class="text-sm text-center mt-2"></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("ticketForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const msg = document.getElementById("formMsg");
+
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      msg.textContent = "";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "送出中...";
+
+      const data = {
+        uid: form.uid.value.trim(),
+        email: form.email.value.trim(),
+        desc: form.desc.value.trim()
+      };
+
+      try {
+        const res = await fetch("https://你的n8n網址/webhook/ticket", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          msg.textContent = "已成功送出，感謝您的回報！";
+          msg.className = "text-green-600 text-sm text-center mt-2";
+          form.reset();
+        } else {
+          throw new Error("送出失敗，請稍後再試");
+        }
+      } catch (error) {
+        msg.textContent = error.message;
+        msg.className = "text-red-500 text-sm text-center mt-2";
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "送出回報";
+    });
+  </script>
+</body>
+</html>
