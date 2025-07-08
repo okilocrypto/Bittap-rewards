@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -44,8 +45,7 @@
     const mission = [
       { d: 50, v: 10000, r: 5 }, { d: 100, v: 50000, r: 10 }, { d: 200, v: 100000, r: 15 },
       { d: 300, v: 300000, r: 20 }, { d: 500, v: 1000000, r: 50 }, { d: 1000, v: 2000000, r: 100 },
-      { d: 3000, v: 3000000, r: 300 }, { d: 5000, v: 5000000, r: 500 }, { d: 10000, v: 10000000, r: 1000 },
-      { d: 20000, v: 30000000, r: 2000 }, { d: 30000, v: 60000000, r: 3000 }, { d: 50000, v: 100000000, r: 5000 }
+      { d: 3000, v: 3000000, r: 300 }, { d: 5000, v: 5000000, r: 500 }
     ];
 
     const contract = [
@@ -59,8 +59,8 @@
 
     const getSum = (rules, deposit, volume, type) => {
       if (type === 'max') {
-        return rules.reduce((acc, r) =>
-          deposit >= r.d && volume >= r.v && r.r > acc ? r.r : acc, 0);
+        const valid = rules.filter(r => deposit >= r.d && volume >= r.v).map(r => r.r);
+        return valid.length ? Math.max(...valid) : 0;
       } else {
         return rules.reduce((acc, r) =>
           deposit >= r.d && volume >= r.v ? acc + r.r : acc, 0);
@@ -84,5 +84,38 @@
       });
     });
   </script>
+
+<p style="text-align:center; font-size: 0.95rem; color: #777;">📅 本活動自 2025/7/10 開始</p>
+
+<h2 style="margin-top: 2rem; font-size: 1.5rem; color: #007aff; text-align: center;">📋 最佳入金與成交量搭配建議</h2>
+<p style="text-align:center; font-size: 0.9rem; color: #555;">轉盤體驗金僅有三個獎勵級距（109 / 809 / 1009 USDT），可疊加</p>
+<table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+  <thead style="background-color: #f5faff;">
+    <tr>
+      <th style="padding: 12px; border: 1px solid #ccc;">建議入金 (USDT)</th>
+      <th style="padding: 12px; border: 1px solid #ccc;">建議成交量 (USDT)</th>
+      <th style="padding: 12px; border: 1px solid #ccc;">可獲得總獎勵</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="padding:10px; border:1px solid #ccc;">100</td><td style="padding:10px; border:1px solid #ccc;">100,000</td><td style="padding:10px; border:1px solid #ccc;">45</td></tr>
+<tr><td style="padding:10px; border:1px solid #ccc;">300</td><td style="padding:10px; border:1px solid #ccc;">250,000</td><td style="padding:10px; border:1px solid #ccc;">354</td></tr>
+<tr><td style="padding:10px; border:1px solid #ccc;">500</td><td style="padding:10px; border:1px solid #ccc;">1,000,000</td><td style="padding:10px; border:1px solid #ccc;">404</td></tr>
+<tr><td style="padding:10px; border:1px solid #ccc;">1000</td><td style="padding:10px; border:1px solid #ccc;">2,500,000</td><td style="padding:10px; border:1px solid #ccc;">1,553</td></tr>
+<tr><td style="padding:10px; border:1px solid #ccc;">2000</td><td style="padding:10px; border:1px solid #ccc;">4,000,000</td><td style="padding:10px; border:1px solid #ccc;">2,003</td></tr>
+<tr><td style="padding:10px; border:1px solid #ccc;">3000</td><td style="padding:10px; border:1px solid #ccc;">5,000,000</td><td style="padding:10px; border:1px solid #ccc;">2,971</td></tr>
+<tr><td style="padding:10px; border:1px solid #ccc;">5000</td><td style="padding:10px; border:1px solid #ccc;">5,000,000</td><td style="padding:10px; border:1px solid #ccc;">3,577</td></tr>
+  </tbody>
+</table>
+
+
+<p style="text-align:center; font-size: 0.9rem; color: #555; margin-top: 3rem;">
+  本表僅供試算，詳細內容可參照活動頁面，或洽詢您的代理。<br/>
+  亦可連繫 BD-Kuma：
+  <a href="https://www.instagram.com/bittap_kuma?igsh=MXRiYmZkNWNkZTJjdw%3D%3D&utm_source=qr" target="_blank" style="text-decoration: none;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="IG" style="height: 18px; vertical-align: text-bottom; margin-left: 4px;" />
+  </a>
+</p>
+
 </body>
 </html>
