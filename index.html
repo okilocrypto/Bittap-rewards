@@ -1,138 +1,213 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>獎勵試算工具｜Kuma Trading</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuma Rewards</title>
+  
+<style>
+  body {
+    font-family: sans-serif;
+    padding: 2rem;
+    margin: 0;
+    background: #f0f4f8;
+    color: #333;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background: #1e1e1e;
+      color: #f0f0f0;
+    }
+    table {
+      background-color: #2a2a2a;
+    }
+    th {
+      background-color: #444;
+      color: #fff;
+    }
+    td {
+      background-color: #2a2a2a;
+      color: #f0f0f0;
+    }
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 1.5rem 0;
+  }
+
+  th, td {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+
+  th {
+    background-color: #007aff;
+    color: white;
+  }
+
+  h1, h2 {
+    text-align: center;
+    color: #007aff;
+  }
+
+  input[type="number"] {
+    width: 100px;
+    padding: 0.4rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .result {
+    font-weight: bold;
+    background: #fffbe7;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      padding: 1rem;
+    }
+    input[type="number"] {
+      width: 80px;
+    }
+    table {
+      font-size: 0.85rem;
+    }
+  }
+
+  p {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #777;
+    margin-bottom: 0.5rem;
+  }
+
+  a img {
+    height: 18px;
+    vertical-align: text-bottom;
+    margin-left: 4px;
+  }
+</style>
+
 </head>
-<body class="flex bg-gray-100 min-h-screen">
+<body>
+  <h1>💰 Kuma Trading 獎勵試算</h1>
+  
 
-  <!-- Sidebar -->
-  <aside class="w-64 bg-white shadow-md border-r border-gray-200 flex flex-col">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h1 class="text-xl font-semibold text-gray-800">Bittap 工具列</h1>
-      <p class="text-sm text-gray-500 mt-1">by BD-Kuma 🐻</p>
-    </div>
-    <nav class="flex-1 px-4 py-4 space-y-2">
-      <a href="index.html"
-         class="block px-4 py-2 rounded-lg text-gray-700 bg-blue-100 text-blue-600 font-medium">
-         🧮 計算機
-      </a>
-      <a href="problem.html"
-         class="block px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-100 hover:text-blue-600 transition">
-         ✉️ 問題回報
-      </a>
-    </nav>
-  </aside>
+<h2 style="margin-top: 2rem;">🧮 試算工具</h2>
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>淨入金 (USDT)</th>
+        <th>累計交易量 (USDT)</th>
+        <th>任務體驗金</th>
+        <th>合約體驗金</th>
+        <th>轉盤體驗金</th>
+        <th>總獎勵</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="number" id="deposit" /></td>
+        <td><input type="number" id="volume" /></td>
+        <td class="result" id="mission"></td>
+        <td class="result" id="contract"></td>
+        <td class="result" id="wheel"></td>
+        <td class="result" id="total"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<script>
+  const mission = [
+    { d: 50, v: 10000, r: 5 }, { d: 100, v: 50000, r: 10 }, { d: 200, v: 100000, r: 15 },
+    { d: 300, v: 300000, r: 20 }, { d: 500, v: 1000000, r: 50 }, { d: 1000, v: 2000000, r: 100 },
+    { d: 3000, v: 3000000, r: 300 }, { d: 5000, v: 5000000, r: 500 }
+  ];
+  const contract = [
+    { d: 100, v: 100000, r: 20 }, { d: 200, v: 500000, r: 100 }, { d: 300, v: 1000000, r: 200 },
+    { d: 500, v: 3000000, r: 350 }, { d: 1000, v: 5000000, r: 700 }, { d: 2000, v: 10000000, r: 2000 }
+  ];
+  const wheel = [
+    { d: 300, v: 250000, r: 109 }, { d: 3000, v: 2000000, r: 809 }, { d: 5000, v: 5000000, r: 1009 }
+  ];
+  const getSum = (rules, d, v, type) =>
+    type === 'max'
+      ? Math.max(0, ...rules.filter(r => d >= r.d && v >= r.v).map(r => r.r))
+      : rules.reduce((sum, r) => d >= r.d && v >= r.v ? sum + r.r : sum, 0);
+  document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', () => {
+      const d = parseFloat(document.getElementById('deposit').value) || 0;
+      const v = parseFloat(document.getElementById('volume').value) || 0;
+      const m = getSum(mission, d, v, 'sum');
+      const c = getSum(contract, d, v, 'max');
+      const w = getSum(wheel, d, v, 'sum');
+      document.getElementById('mission').textContent = m ? m + ' U' : '-';
+      document.getElementById('contract').textContent = c ? c + ' U' : '-';
+      document.getElementById('wheel').textContent = w ? w + ' U' : '-';
+      document.getElementById('total').textContent = (m + c + w) ? (m + c + w) + ' USDT' : '-';
+    });
+  });
+</script>
 
-  <!-- Main Content -->
-  <main class="flex-1 p-6 overflow-auto text-gray-800">
-    <h1 class="text-2xl font-bold text-center mb-6">💰 獎勵試算工具｜Kuma Trading</h1>
-    
-    <div class="overflow-x-auto">
-      <table class="w-full border-collapse bg-white shadow mb-6">
-        <thead>
-          <tr>
-            <th class="bg-blue-500 text-white p-3 border">淨入金 (USDT)</th>
-            <th class="bg-blue-500 text-white p-3 border">累計交易量 (USDT)</th>
-            <th class="bg-blue-500 text-white p-3 border">任務體驗金</th>
-            <th class="bg-blue-500 text-white p-3 border">合約體驗金</th>
-            <th class="bg-blue-500 text-white p-3 border">轉盤體驗金</th>
-            <th class="bg-blue-500 text-white p-3 border">總獎勵</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="text-center">
-            <td class="border p-2"><input type="number" id="deposit" class="w-24 p-1 border rounded" /></td>
-            <td class="border p-2"><input type="number" id="volume" class="w-24 p-1 border rounded" /></td>
-            <td class="border p-2 bg-yellow-50 font-bold" id="mission"></td>
-            <td class="border p-2 bg-yellow-50 font-bold" id="contract"></td>
-            <td class="border p-2 bg-yellow-50 font-bold" id="wheel"></td>
-            <td class="border p-2 bg-yellow-50 font-bold" id="total"></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
 
-    <script>
-      const mission = [
-        { d: 50, v: 10000, r: 5 }, { d: 100, v: 50000, r: 10 }, { d: 200, v: 100000, r: 15 },
-        { d: 300, v: 300000, r: 20 }, { d: 500, v: 1000000, r: 50 }, { d: 1000, v: 2000000, r: 100 },
-        { d: 3000, v: 3000000, r: 300 }, { d: 5000, v: 5000000, r: 500 }
-      ];
+<p style="text-align:center; font-size: 0.9rem; color: #555; margin-top: 1rem;">
+  本頁所列獎勵為三種類型的體驗金，僅為分類方便，實際皆為體驗金性質：<br>
+  💠 <strong>任務體驗金</strong>：來自「福利中心」活動<br>
+  💠 <strong>合約體驗金</strong>：專屬活動回饋（依條件選擇最高檔）<br>
+  💠 <strong>轉盤體驗金</strong>：參與「1927轉盤」活動取得（可疊加三檔）
+</p>
 
-      const contract = [
-        { d: 100, v: 100000, r: 20 }, { d: 200, v: 500000, r: 100 }, { d: 300, v: 1000000, r: 200 },
-        { d: 500, v: 3000000, r: 350 }, { d: 1000, v: 5000000, r: 700 }, { d: 2000, v: 10000000, r: 2000 }
-      ];
+<h2 style="margin-top: 2rem;">📋 最佳入金與成交量搭配建議</h2>
+<p style="text-align:center; font-size: 0.9rem; color: #555;">轉盤體驗金僅有三個獎勵級距（109 / 809 / 1009 USDT），可疊加</p>
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>建議入金 (USDT)</th>
+        <th>建議成交量 (USDT)</th>
+        <th>可獲得總獎勵</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>100</td><td>100,000</td><td>35</td></tr>
+      <tr><td>300</td><td>250,000</td><td>159</td></tr>
+      <tr><td>500</td><td>1,000,000</td><td>409</td></tr>
+      <tr><td>1000</td><td>2,000,000</td><td>509</td></tr>
+      <tr><td>3000</td><td>5,000,000</td><td>2,118</td></tr>
+      <tr><td>5000</td><td>5,000,000</td><td>3,627</td></tr>
+    </tbody>
+  </table>
+</div>
 
-      const wheel = [
-        { d: 300, v: 250000, r: 109 }, { d: 3000, v: 2000000, r: 809 }, { d: 5000, v: 5000000, r: 1009 }
-      ];
+<p style="text-align:center; font-size: 0.9rem; color: #555; margin-top: 2rem;">
+  🎯 雖然入金 100 就可參與，但建議從 <strong>入金 300</strong> 開始，<br>
+  即可解鎖 <strong>轉盤體驗金 109U</strong>，與任務＋合約福利完整組合 ✅
+</p>
 
-      const getSum = (rules, deposit, volume, type) => {
-        if (type === 'max') {
-          const valid = rules.filter(r => deposit >= r.d && volume >= r.v).map(r => r.r);
-          return valid.length ? Math.max(...valid) : 0;
-        } else {
-          return rules.reduce((acc, r) =>
-            deposit >= r.d && volume >= r.v ? acc + r.r : acc, 0);
-        }
-      };
 
-      document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', () => {
-          const deposit = parseFloat(document.getElementById('deposit').value) || 0;
-          const volume = parseFloat(document.getElementById('volume').value) || 0;
+<p style="text-align:center; font-size: 0.9rem; color: #555; margin-top: 3rem;">
+  本表僅供試算，詳細內容可參照活動頁面，或洽詢您的代理。<br/>
+  亦可連繫 BD-Kuma：
+  <a href="https://www.instagram.com/bittap_kuma?igsh=MXRiYmZkNWNkZTJjdw%3D%3D&utm_source=qr" target="_blank" style="text-decoration: none;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="IG" style="height: 18px; vertical-align: text-bottom; margin-left: 4px;" />
+  </a>
+</p>
 
-          const m = getSum(mission, deposit, volume, 'sum');
-          const c = getSum(contract, deposit, volume, 'max');
-          const w = getSum(wheel, deposit, volume, 'sum');
-          const t = m + c + w;
 
-          document.getElementById('mission').textContent = m ? m + ' U' : '-';
-          document.getElementById('contract').textContent = c ? c + ' U' : '-';
-          document.getElementById('wheel').textContent = w ? w + ' U' : '-';
-          document.getElementById('total').textContent = t ? t + ' USDT' : '-';
-        });
-      });
-    </script>
-
-    <p class="text-center text-sm text-gray-600 mt-4">📅 本活動自 2025/7/10 開始</p>
-
-    <h2 class="text-xl text-blue-600 text-center font-semibold mt-10 mb-2">📋 最佳入金與成交量搭配建議</h2>
-    <p class="text-center text-sm text-gray-700 mb-4">轉盤體驗金僅有三個獎勵級距（109 / 809 / 1009 USDT），可疊加</p>
-
-    <div class="overflow-x-auto">
-      <table class="w-full border-collapse bg-white shadow mb-6">
-        <thead class="bg-blue-500 text-white">
-          <tr>
-            <th class="border p-3">建議入金 (USDT)</th>
-            <th class="border p-3">建議成交量 (USDT)</th>
-            <th class="border p-3">可獲得總獎勵</th>
-          </tr>
-        </thead>
-        <tbody class="text-center">
-          <tr><td class="border p-2">100</td><td class="border p-2">100,000</td><td class="border p-2">45</td></tr>
-          <tr><td class="border p-2">300</td><td class="border p-2">250,000</td><td class="border p-2">159</td></tr>
-          <tr><td class="border p-2">500</td><td class="border p-2">1,000,000</td><td class="border p-2">409</td></tr>
-          <tr><td class="border p-2">1000</td><td class="border p-2">2,500,000</td><td class="border p-2">1,553</td></tr>
-          <tr><td class="border p-2">2000</td><td class="border p-2">4,000,000</td><td class="border p-2">2,003</td></tr>
-          <tr><td class="border p-2">3000</td><td class="border p-2">5,000,000</td><td class="border p-2">2,971</td></tr>
-          <tr><td class="border p-2">5000</td><td class="border p-2">5,000,000</td><td class="border p-2">3,577</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="text-center text-sm text-gray-600 mt-6">
-      本表僅供試算，詳細內容可參照活動頁面，或洽詢您的代理。<br/>
-      亦可連繫 BD-Kuma：
-      <a href="https://www.instagram.com/bittap_kuma?igsh=MXRiYmZkNWNkZTJjdw%3D%3D&utm_source=qr" target="_blank" class="inline-flex items-center gap-1 text-blue-500 hover:underline">
-        Instagram <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="IG" class="h-4 inline-block" />
-      </a>
-    </p>
-
-  </main>
 </body>
 </html>
